@@ -75,68 +75,10 @@
       <!-- crank: throw radius is a PLACEHOLDER (see note 1); position is
            solved so the crank loop (bent_link -> upper_ternary.apex) closes
            exactly at this rest pose. -->
-      <body name="crank" pos="-0.0297 0.01271 0">
-        <joint name="crank_joint" pos="0 0 0"/>
-        <geom name="crank_g" type="cylinder" size="0.010 0.0015" rgba="0.9 0.5 0.2 1"/>
-        <site name="crank_pin" pos="0.010 0 0" size="0.001" rgba="1 0 0 1"/>
-
-        <body name="bent_link" pos="0.010 0 0">
-          <joint name="bent_link_joint" pos="0 0 0"/>
-          <geom name="bent_link_g" type="mesh" mesh="bent_link_m" pos="-0.01905 -0.0025 -0.001"/>
-          <site name="bent_link_far" pos="0.01970 0.00829 0" size="0.001" rgba="0 1 0 1"/>
-        </body>
-      </body>
-
-      <!-- upper_ternary: fixed pivot mates ground_link's F -->
-      <body name="upper_ternary" pos="0 0 0">
-        <joint name="upper_ternary_joint" pos="0 0 0"/>
-        <geom name="upper_ternary_g" type="mesh" mesh="upper_ternary_m" pos="-0.0177 -0.0026 -0.0035"/>
-        <site name="upper_ternary_apex" pos="0 0.0210 0" size="0.001" rgba="0 1 0 1"/>
-
-        <body name="straight_link" pos="-0.0120 0 0">
-          <joint name="straight_link_joint" pos="0 0 0"/>
-          <geom name="straight_link_g" type="mesh" mesh="straight_link_m" pos="-0.00245 -0.0025 -0.0015"/>
-
-          <body name="lower_ternary" pos="0.00181 0.02561 0">
-            <joint name="lower_ternary_joint" pos="0 0 0"/>
-            <geom name="lower_ternary_g" type="mesh" mesh="lower_ternary_m" pos="-0.0165 -0.0022 -0.004"/>
-
-            <body name="long_straight_link" pos="-0.0133 0.0610 0">
-              <joint name="long_straight_link_joint" pos="0 0 0"/>
-              <geom name="long_straight_link_g" type="mesh" mesh="long_straight_link_m" pos="-0.00595 -0.0034 -0.003"/>
-
-              <body name="foot_link" pos="0.02635 0.00710 0">
-                <joint name="foot_link_joint" pos="0 0 0"/>
-                <geom name="foot_link_g" type="mesh" mesh="foot_link_m" pos="-0.03386 -0.02789 -0.001"/>
-                <site name="foot_hole2" pos="0.00540 0.00222 0" size="0.001" rgba="0 1 0 1"/>
-              </body>
-            </body>
-
-            <body name="long_bent_link" pos="-0.0003 0.0611 0">
-              <joint name="long_bent_link_joint" pos="0 0 0"/>
-              <geom name="long_bent_link_g" type="mesh" mesh="long_bent_link_m" pos="-0.0025 -0.0025 -0.0045"/>
-              <site name="long_bent_link_far" pos="0.0050 0.0479 0" size="0.001" rgba="0 1 0 1"/>
-            </body>
-          </body>
-        </body>
-      </body>
-
-      <!-- foot_stabiliser_link: also mates ground_link's F -->
-      <body name="foot_stabiliser_link" pos="0 0 0">
-        <joint name="foot_stabiliser_joint" pos="0 0 0"/>
-        <geom name="foot_stabiliser_g" type="mesh" mesh="foot_stabiliser_m" pos="-0.0207 -0.0025 -0.006"/>
-        <site name="foot_stabiliser_far" pos="-0.0166 0.0667 0" size="0.001" rgba="0 1 0 1"/>
-      </body>
+      
     </body>
   </worldbody>
 
-  <equality>
-    <connect name="loop_crank"     body1="bent_link"           body2="upper_ternary" anchor="0.01970 0.00829 0"/>
-    <connect name="loop_foot4bar"  body1="long_bent_link"       body2="foot_link"     anchor="0.0050 0.0479 0"/>
-    <connect name="loop_leveler"   body1="foot_stabiliser_link" body2="foot_link"     anchor="-0.0166 0.0667 0"/>
-  </equality>
-
-  <actuator>
-    <motor name="crank_motor" joint="crank_joint" gear="1" ctrlrange="-1 1"/>
-  </actuator>
+ 
+  
 </mujoco>
