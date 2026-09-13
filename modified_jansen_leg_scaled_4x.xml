@@ -78,7 +78,7 @@
     <geom type="plane" pos="-0.028 0 0.2" size="0.2 0.2 0.2" euler="0 90 0" rgba="1 1 1 0.4"/>
     <!-- ground_link: static frame link. Body origin placed at its pivot F,
          so children hinge at (0,0,0) in this frame. -->
-    <body name="ground_link" pos="0 0 0.6" euler="90 90 0">
+    <body name="ground_link" pos="0 0 1" euler="90 90 0">
       <geom name="ground_link_g" type="mesh" mesh="ground_link_m" pos="-0.006 -0.0308 -0.024"/>
 
       <!-- crank: throw radius is a PLACEHOLDER (see note 1); position is
@@ -147,14 +147,14 @@
                                 <flexcomp type="grid"
                                           count="4 8 2"
                                           spacing=".03 .03 .03"
-                                          pos="-0.03 -0.08 0"
+                                          pos="-0.0 -0.08 0"
                                           euler="90 20 90"
                                           radius=".0"
                                           material="shoe_mat"
                                           
                                           name="softbody"
                                           dim="3"
-                                          mass="2">
+                                          mass="0.7">
 
                                 <contact
                                     contype="1"
@@ -169,6 +169,7 @@
                                     <elasticity young="8e4"
                                                 damping="0.001"
                                                 poisson="0.2"/>
+                                    
                                 </flexcomp>
                               </body>
                               
@@ -184,32 +185,38 @@
   </worldbody>
 
   <actuator>
-    <motor name="crank_motor" joint="crank_joint" gear="1" ctrlrange="-1 1"/>
+    <motor name="crank_motor" joint="crank_joint" gear="1" ctrlrange="-0.5 0.5"/>
   </actuator>
 
   <equality>
-    <connect name= "bent_straight" active="true" site1="bent_link_origin" site2="straight_link_hole" 
-    solref="0.004 1"
-    solimp="0.99 0.99 0.001"/>
-     <connect name= "bent_long_straigh" active="true" site1="bent_link_far" site2="long_straight_link_pin" 
-    solref="0.004 1"
-    solimp="0.99 0.99 0.001"/>
-    <connect name= "lower_ternary_long_straight" active="true" site1="lower_ternary_pin" site2="long_straight_hole_A" 
-    solref="0.004 1"
-    solimp="0.99 0.99 0.001"/>
-    <connect name= "foot_stabilise" active="true" site1="foot_stabiliser_far" site2="foot_hole2" 
-    solref="0.004 1"
-    solimp="0.99 0.99 0.001"/>
-    <weld
-        name="foot_shoe_weld"
-        body1="foot_link"
-        body2="shoe"
-        anchor="0 0 0"
-        solref="0.004 1"
-        solimp="0.99 0.99 0.001"/>
-</equality>
- <contact>
-    <exclude body1="foot_link" body2="shoe"/>
-</contact>
+      <connect name="bent_straight"
+          active="true"
+          site1="bent_link_origin"
+          site2="straight_link_hole"
+          solref="0.001 1"
+          solimp="0.99 0.995 0.0001"/>
+
+      <connect name="bent_long_straigh"
+          active="true"
+          site1="bent_link_far"
+          site2="long_straight_link_pin"
+          solref="0.001 1"
+          solimp="0.99 0.995 0.0001"/>
+
+      <connect name="lower_ternary_long_straight"
+          active="true"
+          site1="lower_ternary_pin"
+          site2="long_straight_hole_A"
+          solref="0.001 1"
+          solimp="0.99 0.995 0.0001"/>
+
+      <connect name="foot_stabilise"
+          active="true"
+          site1="foot_stabiliser_far"
+          site2="foot_hole2"
+          solref="0.001 1"
+          solimp="0.99 0.995 0.0001"/>
+  </equality>
+
   
 </mujoco>
