@@ -44,12 +44,13 @@
 -->
 
   <compiler angle="degree" meshdir="meshes/"/>
-  <option gravity="0 0 0" timestep="0.002"/>
+  <option gravity="0 0 -9.81" timestep="0.0002"/>
 
   <default>
     <geom density="1200" contype="0" conaffinity="0" rgba="0.75 0.75 0.78 1"/>
     <joint type="hinge" axis="0 0 1" damping="0.002"/>
   </default>
+
 
   <asset>
     <mesh name="ground_link_m"        file="ground_link.STL"          scale="0.001 0.001 0.001"/>
@@ -66,30 +67,107 @@
   <worldbody>
     <light pos="0 0 1" dir="0 0 -1" diffuse="1 1 1"/>
     <camera name="side" pos="0 -0.3 0.05" xyaxes="1 0 0 0 0 1"/>
-    <geom type="plane" size="0.05 0.05 0.05" rgba="1 1 1 0.8"/>
+    <geom type="box" size="0.05 0.05 0.001" contype="1" conaffinity="1" rgba="1 1 1 1"/>
     <geom type="plane" pos="-0.007 0 0.05" size="0.05 0.05 0.05" euler="0 90 0" rgba="1 1 1 0.4"/>
     <!-- ground_link: static frame link. Body origin placed at its pivot F,
          so children hinge at (0,0,0) in this frame. -->
-    <body name="ground_link" pos="0 0 0.05" euler="90 90 0">
+    <body name="ground_link" pos="0 0 0.13" euler="90 90 0">
       <geom name="ground_link_g" type="mesh" mesh="ground_link_m" pos="-0.0015 -0.0077 -0.006"/>
 
       <!-- crank: throw radius is a PLACEHOLDER (see note 1); position is
            solved so the crank loop (bent_link -> upper_ternary.apex) closes
            exactly at this rest pose. -->
-       <body name="crank" pos="0.016 -0.001 -0.002">
+       <body name="crank" pos="0.016 -0.001 0.0008" euler="0 180 0" >
         <joint name="crank_joint" pos="0 0 0" type="hinge"/>
         <geom name="crank_g" type="cylinder" size="0.010 0.0015" rgba="0.9 0.5 0.2 1"/>
         <site name="crank_pin" pos="0.010 0 0" size="0.001" rgba="1 0 0 1"/>
 
-        <body name="bent_link" pos="0.010 0 0">
+        <body name="bent_link" pos="0.0010 -0.003 -0.0035">
           <joint name="bent_link_joint" pos="0 0 0"/>
           <geom name="bent_link_g" type="mesh" mesh="bent_link_m" pos="-0.01905 -0.0025 -0.001"/>
           <site name="bent_link_far" pos="0.01970 0.00829 0" size="0.001" rgba="0 1 0 1"/>
+          <site name ="bent_link_origin" pos="0 0 -0.0015" size="0.001" rgba="0 0 0 1"/>
         </body>
       </body>
+
+       <body name="upper_ternary" pos="0.00 0 0">
+
+        <joint name="upper_ternary_joint" pos="0.000 0 0"/>
+        <geom name="upper_ternary_g" type="mesh" mesh="upper_ternary_m" pos="-0.0177 -0.0026 -0.0035"/>
+        <site name="upper_ternary_apex" pos="0 0.0210 0" size="0.001" rgba="0 1 0 1"/>
+        <site name="upper_ternary_left" pos="-0.012 0 0" size="0.001" rgba="0 0 1 1"/>
+        
+          <body name="straight_link" pos="-0.0019 0.0230 0.005" euler="0 0 -210">
+            <joint name="straight_link_joint" pos="-0.0036 0.001  0"/>
+            <site name = "straight_link_hole" pos="-0.0245 0.0155 0" size="0.001"/>
+            <geom name="straight_link_g" type="mesh" mesh="straight_link_m" pos="-0.00245 -0.0025 -0.0015" euler="0 0 60"/>
+
+    
+          </body>
+
+            <body name="long_straight_link" pos="0 -0.041 -0.002" euler=" 0 0 74.2" >
+                <joint name="long_straight_link_joint" pos="0.039 0.011 0"/>
+                <geom name="long_straight_link_g" type="mesh" mesh="long_straight_link_m" pos="-0.00595 -0.0034 -0.003"/>
+                 <site name = "long_straight_link_pin" pos="0.026 0.0072 0" size="0.001"/>
+                 <site name = "long_straight_hole_A" pos="-0.0035 -0.001 0" size="0.001"/>
+                 <site name = "long_straight_hole_B" pos=" 0.0035 0.001 0" size="0.001"/>
+                 
+                    <body name="foot_stabiliser_link" pos="-0.063 -.015 0.007" euler="0 0 -90">
+                      <joint name="foot_stabiliser_joint" pos="-0.016 0.067 0"/>
+                      <geom name="foot_stabiliser_g" type="mesh" mesh="foot_stabiliser_m" pos="-0.0207 -0.0025 -0.006"/>
+                      <site name="foot_stabiliser_far" pos="0 0 0" size="0.001" rgba="0 1 0 1"/>
+
+                    </body>
+                    
+              </body>
+
+             <body name="long_bent_link" pos="-0.007  -0.048 -0.008" euler="0 180 0">
+              
+              <geom name="long_bent_link_g" type="mesh" mesh="long_bent_link_m" pos="-0.0025 -0.0025 -0.0045"/>
+              <joint name="long_bent_link_origin" pos="0.0050 0.0479 0"/>
+
+
+                <body name="lower_ternary" pos="0.003 -0.0625 -0.001" euler="0 180 0" >
+                    <joint name="lower_ternary_joint" pos="0.003 0.063 0"/>
+                    <geom name="lower_ternary_g" type="mesh" mesh="lower_ternary_m" pos="0 0 0"/>
+                    <site name = "lower_ternary_pin" pos="0.0160 0.0634 0" size="0.001"/>
+
+                      <body name="foot_link" pos="0.017 0.002 0">
+                        <joint name="foot_link_joint" pos="0 0 0"/>
+                        <geom name="foot_link_g" type="mesh" mesh="foot_link_m" pos="-0.03386 -0.02789 -0.001"/>
+                        <site name="foot_hole2" pos="0.00540 0.00222 0" size="0.001" rgba="0 1 0 1"/>
+
+                            
+                              <body name="shoe" pos="0 0 0">
+                                
+                              </body>
+                      </body>
+                </body>
+            </body>
+
+       </body>
+
     </body>
   </worldbody>
 
+  <actuator>
+    <motor name="crank_motor" joint="crank_joint" gear="1" ctrlrange="-1 1"/>
+  </actuator>
+
+  <equality>
+    <connect name= "bent_straight" active="true" site1="bent_link_origin" site2="straight_link_hole" 
+    solref="0.004 1"
+    solimp="0.99 0.99 0.001"/>
+     <connect name= "bent_long_straigh" active="true" site1="bent_link_far" site2="long_straight_link_pin" 
+    solref="0.004 1"
+    solimp="0.99 0.99 0.001"/>
+    <connect name= "lower_ternary_long_straight" active="true" site1="lower_ternary_pin" site2="long_straight_hole_A" 
+    solref="0.004 1"
+    solimp="0.99 0.99 0.001"/>
+    <connect name= "foot_stabilise" active="true" site1="foot_stabiliser_far" site2="foot_hole2" 
+    solref="0.004 1"
+    solimp="0.99 0.99 0.001"/>
+</equality>
  
   
 </mujoco>
