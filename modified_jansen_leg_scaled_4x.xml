@@ -89,29 +89,28 @@
         <geom name="crank_g" type="cylinder" size="0.04 0.006" rgba="0.9 0.5 0.2 1"/>
         <site name="crank_pin" pos="0.04 0 0" size="0.004" rgba="1 0 0 1"/>
 
-        <body name="bent_link" pos="0.004 -0.012 -0.014">
+        <!-- <body name="bent_link" pos="-0.01 0.0 -0.014" euler="0 0 -60">
           <joint name="bent_link_joint" pos="0 0 0"/>
           <geom name="bent_link_g" type="mesh" mesh="bent_link_m" pos="-0.0762 -0.01 -0.004"/>
           <site name="bent_link_far" pos="0.0788 0.03316 0" size="0.004" rgba="0 1 0 1"/>
-          <site name ="bent_link_origin" pos="0 0 -0.006" size="0.004" rgba="0 0 0 1"/>
-        </body>
-      </body>
+            </body> -->
+        <body name="straight_link" pos="-0.0 -0.02 -0.02" euler="0 0 -90">
+            <site name="straight_link_far" pos="-0.1 0.06 0" size="0.005"/>
+            <joint name = "straight_link_origin" pos="-0.015 0.0035 0"/>
+            <geom name="straight_link_g" type="mesh" mesh="straight_link_m" pos="-0.0098 -0.01 -0.006" euler="0 0 60"/>
 
-       <body name="upper_ternary" pos="0 0 0">
+          
+          </body>
+      </body>
+       <body name="upper_ternary" pos="0. 0 0">
 
         <joint name="upper_ternary_joint" pos="0 0 0"/>
         <geom name="upper_ternary_g" type="mesh" mesh="upper_ternary_m" pos="-0.0708 -0.0104 -0.014"/>
         <site name="upper_ternary_apex" pos="0 0.084 0" size="0.004" rgba="0 1 0 1"/>
         <site name="upper_ternary_left" pos="-0.048 0 0" size="0.004" rgba="0 0 1 1"/>
-        
-          <body name="straight_link" pos="-0.0076 0.092 0.02" euler="0 0 -210">
-            <joint name="straight_link_joint" pos="-0.0144 0.004 0"/>
-            <site name = "straight_link_hole" pos="-0.098 0.062 0" size="0.004"/>
-            <geom name="straight_link_g" type="mesh" mesh="straight_link_m" pos="-0.0098 -0.01 -0.006" euler="0 0 60"/>
-
-    
-          </body>
-
+    </body>
+          
+<!--
             <body name="long_straight_link" pos="0 -0.164 -0.008" euler=" 0 0 74.2" >
                 <joint name="long_straight_link_joint" pos="0.156 0.044 0"/>
                 <geom name="long_straight_link_g" type="mesh" mesh="long_straight_link_m" pos="-0.0238 -0.0136 -0.012"/>
@@ -144,40 +143,14 @@
                         <geom name="foot_link_g" type="mesh" mesh="foot_link_m" pos="-0.13544 -0.11156 -0.004"/>
                         <site name="foot_hole2" pos="0.0216 0.00888 0" size="0.004" rgba="0 1 0 1"/>
                               <body name="shoe">
-                                <flexcomp type="grid"
-                                          count="4 8 2"
-                                          spacing=".03 .03 .03"
-                                          pos="-0.0 -0.08 0"
-                                          euler="90 20 90"
-                                          radius=".0"
-                                          material="shoe_mat"
-                                          
-                                          name="softbody"
-                                          dim="3"
-                                          mass="0.7">
-
-                                <contact
-                                    contype="1"
-                                    conaffinity="1"
-                                    condim="3"
-                                    solref="0.003 1"
-                                    solimp=".95 .99 .0001"
-                                    selfcollide="none"
-                                    activelayers="2"
-                                    />
                                 
-                                    <elasticity young="8e4"
-                                                damping="0.001"
-                                                poisson="0.2"/>
-                                    
-                                </flexcomp>
                               </body>
                               
                       </body>
                 </body>
             </body>
 
-       </body>
+       </body> -->
 
     </body>
 
@@ -185,37 +158,25 @@
   </worldbody>
 
   <actuator>
-    <motor name="crank_motor" joint="crank_joint" gear="1" ctrlrange="-0.5 0.5"/>
+    <velocity name="crank_velocity"
+          joint="crank_joint"
+          kv="4"
+          ctrlrange="-1 1"/> 
   </actuator>
 
   <equality>
-      <connect name="bent_straight"
-          active="true"
-          site1="bent_link_origin"
-          site2="straight_link_hole"
-          solref="0.001 1"
-          solimp="0.99 0.995 0.0001"/>
-
-      <connect name="bent_long_straigh"
-          active="true"
-          site1="bent_link_far"
-          site2="long_straight_link_pin"
-          solref="0.001 1"
-          solimp="0.99 0.995 0.0001"/>
-
-      <connect name="lower_ternary_long_straight"
-          active="true"
-          site1="lower_ternary_pin"
-          site2="long_straight_hole_A"
-          solref="0.001 1"
-          solimp="0.99 0.995 0.0001"/>
-
-      <connect name="foot_stabilise"
-          active="true"
-          site1="foot_stabiliser_far"
-          site2="foot_hole2"
-          solref="0.001 1"
-          solimp="0.99 0.995 0.0001"/>
+ <connect name= "ternary_straight" active="true" site1="upper_ternary_apex" site2="straight_link_far" 
+      solref="0.02 1"
+      solimp="0.8 0.95 0.01"/> 
+      <!-- <connect name= "bent_long_straigh" active="true" site1="bent_link_far" site2="long_straight_link_pin" 
+      solref="0.004 1"
+      solimp="0.99 0.99 0.001"/>
+      <connect name= "lower_ternary_long_straight" active="true" site1="lower_ternary_pin" site2="long_straight_hole_A" 
+      solref="0.004 1"
+      solimp="0.99 0.99 0.001"/>
+      <connect name= "foot_stabilise" active="true" site1="foot_stabiliser_far" site2="foot_hole2" 
+      solref="0.004 1"
+      solimp="0.99 0.99 0.001"/>  -->
   </equality>
 
   
