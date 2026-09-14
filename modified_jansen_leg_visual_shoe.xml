@@ -1,0 +1,209 @@
+<mujoco model="klann_leg">
+<!--
+  Built by measuring pivot-hole / pivot-pin locations directly out of each STL
+  (via containment-grid + boundary-loop analysis), then cross-checked against
+  the two assembly screenshots. Units below are meters. All geometric dimensions/positions have been globally scaled by 4x
+  from the original model.
+
+  TOPOLOGY (my reconstruction == please sanity-check against your SolidWorks
+  mate list, this is the single biggest source of error):
+
+    ground_link (static, one shared pin F)
+      +== crank (driven hinge, placeholder axis/throw == NOT derivable from
+      |     the mesh since no crank/motor-disc STL was supplied)
+      |     +== bent_link  ==[EQUALITY]==> upper_ternary.apex
+      +== upper_ternary (hinge @ F)
+      |     +== straight_link
+      |           +== lower_ternary (hinge @ straight_link far end)
+      |                 +== long_straight_link
+      |                 |     +== foot_link (hinge @ long_straight_link far end)
+      |                 +== long_bent_link ==[EQUALITY]==> foot_link.hole2
+      +== foot_stabiliser_link (hinge @ F) ==[EQUALITY]==> foot_link.hole2
+
+  Three independent loops close via <equality><connect>: the crank-drive loop,
+  the foot-leveling loop (ground/foot_stabiliser/lower_ternary/upper_ternary),
+  and the foot 4-bar (lower_ternary/long_straight_link/foot_link/long_bent_link).
+
+  ASSUMPTIONS FLAGGED FOR YOU TO VERIFY:
+   1. crank body: no mesh was provided for it, so its position/orientation
+      relative to ground_link and its throw radius are PLACEHOLDERS (25mm
+      offset, 10mm throw). Replace with your real crank dimensions.
+   2. Each body's initial orientation is assumed IDENTITY (0 rotation) ==
+      i.e. I placed parts using their raw local mesh coordinates. Your actual
+      assembled angles will differ; MuJoCo's solver will pull the equality
+      constraints together on the first steps, but a wildly wrong starting
+      angle can make it settle into the wrong branch. If the simulated pose
+      looks folded backwards/inside-out compared to the screenshots, rotate
+      the offending body's initial qpos (its hinge angle) by ~180 deg.
+   3. long_straight_link showed 3 candidate pivot features in the mesh (1 pin
+      + 2 close holes); I merged the 2 close holes into one "near" pivot.
+      Double check this is right and not actually 2 separate connections.
+   4. foot_link's two holes are only 5.8mm apart; I assumed hole2 is shared
+      (stacked) by both long_bent_link and foot_stabiliser_link. If your
+      design actually has a third pivot point on the foot, this is wrong.
+-->
+
+  <compiler angle="degree" meshdir="meshes/"/>
+  <option gravity="0 0 -9.81" timestep="0.0002"/>
+
+  <default>
+    <geom density="1200" contype="0" conaffinity="0" rgba="0.75 0.75 0.78 1"/>
+    <joint type="hinge" axis="0 0 1" damping="0.002"/>
+  </default>
+
+
+  <asset>
+    <mesh name="ground_link_m"        file="ground_link.STL"          scale="0.004 0.004 0.004"/>
+    <mesh name="upper_ternary_m"      file="upper_ternary.STL"        scale="0.004 0.004 0.004"/>
+    <mesh name="lower_ternary_m"      file="lower_ternary.STL"        scale="0.004 0.004 0.004"/>
+    <mesh name="bent_link_m"          file="bent_link.STL"            scale="0.004 0.004 0.004"/>
+    <mesh name="straight_link_m"      file="straight_link.STL"        scale="0.004 0.004 0.004"/>
+    <mesh name="long_straight_link_m" file="long_straight_link.STL"   scale="0.004 0.004 0.004"/>
+    <mesh name="long_bent_link_m"     file="long_bent_link.STL"       scale="0.004 0.004 0.004"/>
+    <mesh name="foot_stabiliser_m"    file="foot_stabiliser_link.STL" scale="0.004 0.004 0.004"/>
+    <mesh name="foot_link_m"          file="foot_link.STL"            scale="0.004 0.004 0.004"/>
+    <material name="shoe_mat"
+          rgba="0 .7 .7 0.6"
+          emission="0.5"/>
+  </asset>
+
+
+
+  <worldbody>
+    <light pos="0 0 4" dir="0 0 -1" diffuse="1 1 1"/>
+    <light name="overhead_light" pos="0 0.2 1" dir="0 0 -1" diffuse="0.7 0.7 0.7"/>
+    
+    <camera name="side" pos="0 -1.2 0.2" xyaxes="1 0 0 0 0 1"/>
+    <geom type="box" size="0.6 0.6 0.02" contype="1" conaffinity="1" rgba="1 1 1 1"/>
+    <geom type="plane" pos="-0.028 0 0.2" size="0.2 0.2 0.2" euler="0 90 0" rgba="1 1 1 0.4"/>
+    <!-- ground_link: static frame link. Body origin placed at its pivot F,
+         so children hinge at (0,0,0) in this frame. -->
+    <body name="ground_link" pos="0 0 0.55" euler="90 90 0">
+      <geom name="ground_link_g" type="mesh" mesh="ground_link_m" pos="-0.006 -0.0308 -0.024"/>
+
+      <!-- crank: throw radius is a PLACEHOLDER (see note 1); position is
+           solved so the crank loop (bent_link -> upper_ternary.apex) closes
+           exactly at this rest pose. -->
+       <body name="crank" pos="0.064 -0.004 0.0032" euler="0 180 0" >
+        <joint name="crank_joint" pos="0 0 0" type="hinge"/>
+        <geom name="crank_g" type="cylinder" size="0.04 0.006" rgba="0.9 0.5 0.2 1"/>
+        <site name="crank_pin" pos="0.04 0 0" size="0.004" rgba="1 0 0 1"/>
+
+        <body name="bent_link" pos="0.004 -0.012 -0.014">
+          <joint name="bent_link_joint" pos="0 0 0"/>
+          <geom name="bent_link_g" type="mesh" mesh="bent_link_m" pos="-0.0762 -0.01 -0.004"/>
+          <site name="bent_link_far" pos="0.0788 0.03316 0" size="0.004" rgba="0 1 0 1"/>
+          <site name ="bent_link_origin" pos="0 0 -0.006" size="0.004" rgba="0 0 0 1"/>
+        </body>
+      </body>
+
+       <body name="upper_ternary" pos="0 0 0">
+
+        <joint name="upper_ternary_joint" pos="0 0 0"/>
+        <geom name="upper_ternary_g" type="mesh" mesh="upper_ternary_m" pos="-0.0708 -0.0104 -0.014"/>
+        <site name="upper_ternary_apex" pos="0 0.084 0" size="0.004" rgba="0 1 0 1"/>
+        <site name="upper_ternary_left" pos="-0.048 0 0" size="0.004" rgba="0 0 1 1"/>
+        
+          <body name="straight_link" pos="-0.0076 0.092 0.02" euler="0 0 -210">
+            <joint name="straight_link_joint" pos="-0.0144 0.004 0"/>
+            <site name = "straight_link_hole" pos="-0.098 0.062 0" size="0.004"/>
+            <geom name="straight_link_g" type="mesh" mesh="straight_link_m" pos="-0.0098 -0.01 -0.006" euler="0 0 60"/>
+
+    
+          </body>
+
+            <body name="long_straight_link" pos="0 -0.164 -0.008" euler=" 0 0 74.2" >
+                <joint name="long_straight_link_joint" pos="0.156 0.044 0"/>
+                <geom name="long_straight_link_g" type="mesh" mesh="long_straight_link_m" pos="-0.0238 -0.0136 -0.012"/>
+                 <site name = "long_straight_link_pin" pos="0.104 0.0288 0" size="0.004"/>
+                 <site name = "long_straight_hole_A" pos="-0.014 -0.004 0" size="0.004"/>
+                 <site name = "long_straight_hole_B" pos="0.014 0.004 0" size="0.004"/>
+                 
+                    <body name="foot_stabiliser_link" pos="-0.252 -0.06 0.028" euler="0 0 -90">
+                      <joint name="foot_stabiliser_joint" pos="-0.064 0.268 0"/>
+                      <geom name="foot_stabiliser_g" type="mesh" mesh="foot_stabiliser_m" pos="-0.0828 -0.01 -0.024"/>
+                      <site name="foot_stabiliser_far" pos="0 0 0" size="0.004" rgba="0 1 0 1"/>
+
+                    </body>
+                    
+              </body>
+
+             <body name="long_bent_link" pos="-0.028 -0.192 -0.032" euler="0 180 0">
+              
+              <geom name="long_bent_link_g" type="mesh" mesh="long_bent_link_m" pos="-0.01 -0.01 -0.018"/>
+              <joint name="long_bent_link_origin" pos="0.02 0.1916 0"/>
+
+
+                <body name="lower_ternary" pos="0.012 -0.25 -0.004" euler="0 180 0" >
+                    <joint name="lower_ternary_joint" pos="0.012 0.252 0"/>
+                    <geom name="lower_ternary_g" type="mesh" mesh="lower_ternary_m" pos="0 0 0"/>
+                    <site name = "lower_ternary_pin" pos="0.064 0.2536 0" size="0.004"/>
+
+                      <body name="foot_link" pos="0.068 0.008 0">
+                        <joint name="foot_link_joint" pos="0 0 0"/>
+                        <geom name="foot_link_g" type="mesh" mesh="foot_link_m" pos="-0.13544 -0.11156 -0.004"/>
+                        <site name="foot_hole2" pos="0.0216 0.00888 0" size="0.004" rgba="0 1 0 1"/>
+                              <body name="shoe">
+                                <flexcomp type="grid"
+                                          count="4 8 2"
+                                          spacing=".03 .03 .03"
+                                          pos="-0.03 -0.08 0"
+                                          euler="90 20 90"
+                                          radius=".0"
+                                          material="shoe_mat"
+                                          name="softbody"
+                                          dim="3"
+                                          mass="2">
+
+                                  <!-- GEOMETRY-ONLY MODE:
+                                       pin every flex point to the shoe parent.
+                                       The flex therefore follows foot_link rigidly. -->
+                                  <pin gridrange="0 0 0 3 7 1"/>
+
+                                  <!-- No contact physics while positioning. -->
+                                  <contact
+    contype="0"
+    conaffinity="0"
+    condim="1"
+    solref="0.01 1"
+    solimp=".95 .99 .0001"
+    selfcollide="none"
+    activelayers="2"
+    friction="0 0 0"/>
+                                  <edge damping="100"/>
+                                  <elasticity young="8e4"
+                                              damping="0.001"
+                                              poisson="0.2"/>
+                                </flexcomp>
+                              </body>
+                              
+                      </body>
+                </body>
+            </body>
+
+       </body>
+
+    </body>
+
+
+  </worldbody>
+
+  <actuator>
+    <motor name="crank_motor" joint="crank_joint" gear="1" ctrlrange="-1 1"/>
+  </actuator>
+
+  <equality>
+    <connect name= "bent_straight" active="true" site1="bent_link_origin" site2="straight_link_hole" 
+    solref="0.004 1"
+    solimp="0.99 0.99 0.001"/>
+     <connect name= "bent_long_straigh" active="true" site1="bent_link_far" site2="long_straight_link_pin" 
+    solref="0.004 1"
+    solimp="0.99 0.99 0.001"/>
+    <connect name= "lower_ternary_long_straight" active="true" site1="lower_ternary_pin" site2="long_straight_hole_A" 
+    solref="0.004 1"
+    solimp="0.99 0.99 0.001"/>
+    <connect name= "foot_stabilise" active="true" site1="foot_stabiliser_far" site2="foot_hole2" 
+    solref="0.004 1"
+    solimp="0.99 0.99 0.001"/>
+</equality>
+</mujoco>
