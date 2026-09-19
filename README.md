@@ -4,10 +4,9 @@ preview (does not include assets for now, refer above document as recommended):
 
 # Modified Jansen Walking Mechanism Report
 
-
+![alt text](<demo/Screencast from 2026-09-18 23-34-17.gif>)
 
 ## Abstract
-
 Theo Jansen's linkage is a well-known single-degree-of-freedom, eight-bar planar mechanism that converts rotary input into a leg-like walking trajectory. The objective of this project was to reduce the visual and part-count complexity of the standard Jansen leg — consolidating links where they do not affect the underlying kinematics — while keeping the mechanism at one degree of freedom and retaining a Jansen-like foot trajectory that closely matched human gait.
 
 The design was carried out in SolidWorks, using its Motion Study add-in to verify the trajectory and animate the assembled mechanism, and later reconstructed in MuJoCo to evaluate contact dynamics and inform a physical build.
